@@ -59,19 +59,23 @@ void saveScreenshot(char *filename) {
 
 void myinit() {
     /* setup gl view here */
+    // set background color
     glClearColor(0.0, 0.0, 0.0, 0.0);
+    // enable depth buffering
+    glEnable(GL_DEPTH_TEST);
+    // interpolate colors during rasterization
+    glShadeModel(GL_SMOOTH);
+
 }
 
-void display() {
+/**
+ * cube model from start code
+ */
+void displayCube() {
     /* draw 1x1 cube about origin */
     /* replace this code with your height field implementation */
     /* you may also want to precede it with your
   rotation/translation/scaling */
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-
-    gluLookAt(0, 0, 1, 0, 0, -1, 0, 1, 0);
-
     glBegin(GL_POLYGON);
 
     glColor3f(1.0, 1.0, 1.0);
@@ -84,6 +88,30 @@ void display() {
     glVertex3f(0.5, -0.5, 0.0);
 
     glEnd();
+}
+
+/**
+ * main display function
+ */
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // do transform
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glPushMatrix();
+    gluLookAt(0, 0, 5, 0, 0, -1, 0, 1, 0);
+    glTranslatef(g_vLandTranslate[0], g_vLandTranslate[1], g_vLandTranslate[2]);
+    // rotate along three axis
+    glRotatef(g_vLandRotate[0], 1, 0, 0);
+    glRotatef(g_vLandRotate[1], 0, 1, 0);
+    glRotatef(g_vLandRotate[2], 0, 0, 1);
+    glScalef(g_vLandScale[0], g_vLandScale[1], g_vLandScale[2]);
+
+    // render different models
+    displayCube();
+    glPopMatrix();
     glutSwapBuffers();
 }
 
@@ -98,9 +126,10 @@ void reshape(int w, int h) {
     // You will see weird problems if they are zero or negative.
 
     // setup camera
-    glFrustum(-0.1, 0.1,
-              -float(h) / (10.0 * float(w)),
-              float(h) / (10.0 * float(w)), 0.01, 1000.0);
+//    glFrustum(-0.1, 0.1,
+//              -float(h) / (10.0 * float(w)),
+//              float(h) / (10.0 * float(w)), 0.01, 1000.0);
+    gluPerspective(45, aspect, 0.01, 1000.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -118,6 +147,7 @@ void doIdle() {
     /* do some stuff... */
 
     /* make the screen update */
+    // TODO: make screen shoot here
     glutPostRedisplay();
 }
 
@@ -226,18 +256,8 @@ int main(int argc, char **argv) {
     // creates a window
     glutCreateWindow("assign1");
 
-    // set background color
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    // enable depth buffering
-    glEnable(GL_DEPTH_TEST);
-    // interpolate colors during rasterization
-    glShadeModel(GL_SMOOTH);
-
-    glutReshapeFunc(reshape);
-
     /* tells glut to use a particular display function to redraw */
     glutDisplayFunc(display);
-
 
     /* allow the user to quit using the right mouse button menu */
     g_iMenuId = glutCreateMenu(menufunc);
@@ -256,6 +276,7 @@ int main(int argc, char **argv) {
     glutMouseFunc(mousebutton);
 
     /* do initialization */
+    glutReshapeFunc(reshape);
     myinit();
 
     glutMainLoop();
