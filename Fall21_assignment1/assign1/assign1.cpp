@@ -59,6 +59,10 @@ void saveScreenshot(char *filename) {
     pic_free(in);
 }
 
+void displayHeightFields() {
+
+}
+
 /**
  * cube model from start code
  */
@@ -92,7 +96,7 @@ void display() {
     glLoadIdentity();
 
     // look from top
-    gluLookAt(0, 10, 0, 0, 0, 0, 0, 0, -1);
+    gluLookAt(0, 0, 5, 0, 0, -1, 0, 1, 0);
     glTranslatef(g_vLandTranslate[0], g_vLandTranslate[1], g_vLandTranslate[2]);
     // rotate along three axis
     glRotatef(g_vLandRotate[0], 1, 0, 0);
@@ -225,6 +229,18 @@ void keybutton(unsigned char key, int x, int y){
             break;
         default:
             g_ControlState = ROTATE;
+            break;
+    }
+
+    switch (key) {
+        case '1':
+            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+            break;
+        case '2':
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+        case '3':
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             break;
     }
 }
