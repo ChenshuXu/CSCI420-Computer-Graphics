@@ -9,6 +9,8 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 #include <pic.h>
+#include <iostream>
+using namespace std;
 
 int g_iMenuId;
 
@@ -57,17 +59,6 @@ void saveScreenshot(char *filename) {
     pic_free(in);
 }
 
-void myinit() {
-    /* setup gl view here */
-    // set background color
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    // enable depth buffering
-    glEnable(GL_DEPTH_TEST);
-    // interpolate colors during rasterization
-    glShadeModel(GL_SMOOTH);
-
-}
-
 /**
  * cube model from start code
  */
@@ -100,8 +91,8 @@ void display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glPushMatrix();
-    gluLookAt(0, 0, 5, 0, 0, -1, 0, 1, 0);
+    // look from top
+    gluLookAt(0, 10, 0, 0, 0, 0, 0, 0, -1);
     glTranslatef(g_vLandTranslate[0], g_vLandTranslate[1], g_vLandTranslate[2]);
     // rotate along three axis
     glRotatef(g_vLandRotate[0], 1, 0, 0);
@@ -111,7 +102,7 @@ void display() {
 
     // render different models
     displayCube();
-    glPopMatrix();
+
     glutSwapBuffers();
 }
 
@@ -224,6 +215,31 @@ void mousebutton(int button, int state, int x, int y) {
     g_vMousePos[1] = y;
 }
 
+void keybutton(unsigned char key, int x, int y){
+    switch (key) {
+        case 't':
+            g_ControlState = TRANSLATE;
+            break;
+        case 's':
+            g_ControlState = SCALE;
+            break;
+        default:
+            g_ControlState = ROTATE;
+            break;
+    }
+}
+
+void myinit() {
+    /* setup gl view here */
+    // set background color
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    // enable depth buffering
+    glEnable(GL_DEPTH_TEST);
+    // interpolate colors during rasterization
+    glShadeModel(GL_SMOOTH);
+
+}
+
 int main(int argc, char **argv) {
     if (argc < 2) {
         printf("usage: %s heightfield.jpg\n", argv[0]);
@@ -246,16 +262,14 @@ int main(int argc, char **argv) {
     */
     // request double buffer
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGBA);
-
     // set window size
     glutInitWindowSize(640, 480);
-
     // set window position
     glutInitWindowPosition(0, 0);
-
     // creates a window
     glutCreateWindow("assign1");
-
+    /* callback for resizing the window */
+    glutReshapeFunc(reshape);
     /* tells glut to use a particular display function to redraw */
     glutDisplayFunc(display);
 
@@ -267,16 +281,17 @@ int main(int argc, char **argv) {
 
     /* replace with any animate code */
     glutIdleFunc(doIdle);
-
     /* callback for mouse drags */
     glutMotionFunc(mousedrag);
     /* callback for idle mouse movement */
     glutPassiveMotionFunc(mouseidle);
     /* callback for mouse button changes */
     glutMouseFunc(mousebutton);
+    /* callback for keyboard button pressed */
+    glutKeyboardFunc(keybutton);
+
 
     /* do initialization */
-    glutReshapeFunc(reshape);
     myinit();
 
     glutMainLoop();
