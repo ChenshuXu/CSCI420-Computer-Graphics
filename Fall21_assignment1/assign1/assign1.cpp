@@ -1,6 +1,7 @@
 /*
   CSCI 480 Computer Graphics
   Assignment 1: Height Fields
+  Chenshu Xu
   C++ starter code
 */
 
@@ -33,6 +34,9 @@ float g_vLandScale[3] = {1.0, 1.0, 1.0};
 /* see <your pic directory>/pic.h for type Pic */
 Pic *g_pHeightData;
 
+bool screenShot = false;
+int frameCount = 0;
+
 /* Write a screenshot to the specified filename */
 void saveScreenshot(char *filename) {
     int i, j;
@@ -59,8 +63,41 @@ void saveScreenshot(char *filename) {
     pic_free(in);
 }
 
-void displayHeightFields() {
+void createScreenshot(int frame) {
+    char myFilenm[2048];
+    sprintf(myFilenm, "screenshots/anim.%04d.jpg", frame);
+    saveScreenshot(myFilenm);
+}
 
+/**
+ * height field model
+ */
+void displayHeightFields() {
+    // offsets to adjust the model within (-5,-5) to (5,5) range
+    float x_offset = (g_pHeightData->nx) / 2;
+    float y_offset = (g_pHeightData->ny) / 2;
+    float total_x = g_pHeightData->nx / 5;
+    float total_y = g_pHeightData->nx / 5;
+    float z_multiple = 1.0f;
+
+    for (int i = 0; i < g_pHeightData->ny - 1; i++) {
+        glBegin(GL_TRIANGLE_STRIP);
+        for (int j = 0; j < g_pHeightData->nx; j++) {
+            float indx0 = PIC_PIXEL(g_pHeightData, j, i, 0); // 'top' vertex
+            float indx1 = PIC_PIXEL(g_pHeightData, j, i + 1, 0); // 'bottom' vertex
+            float z0 = indx0 / 255; // convert to z coordinate (value from 0-1)
+            float z1 = indx1 / 255;
+
+            // top vertex
+            glColor3f(z0, z0, z0);
+            glVertex3f((j - x_offset) / total_x, (i - y_offset) / total_y, z0*z_multiple);
+
+            // bottom vertex
+            glColor3f(z1, z1, z1);
+            glVertex3f((j - x_offset) / total_x, (i + 1 - y_offset) / total_y, z1*z_multiple);
+        } // next col
+        glEnd();
+    } // next row
 }
 
 /**
@@ -95,8 +132,9 @@ void display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // look from top
-    gluLookAt(0, 0, 5, 0, 0, -1, 0, 1, 0);
+    // standard camera direction, move backwards, so we can put the model on the origin point
+    gluLookAt(0, 0, 10, 0, 0, -1, 0, 1, 0);
+    // translate the model
     glTranslatef(g_vLandTranslate[0], g_vLandTranslate[1], g_vLandTranslate[2]);
     // rotate along three axis
     glRotatef(g_vLandRotate[0], 1, 0, 0);
@@ -104,9 +142,14 @@ void display() {
     glRotatef(g_vLandRotate[2], 0, 0, 1);
     glScalef(g_vLandScale[0], g_vLandScale[1], g_vLandScale[2]);
 
-    // render different models
-    displayCube();
+    // render different models here
+//    displayCube();
+    displayHeightFields();
 
+    if (frameCount < 15*30 && screenShot) {
+        createScreenshot(frameCount);
+        frameCount++;
+    }
     glutSwapBuffers();
 }
 
@@ -242,6 +285,8 @@ void keybutton(unsigned char key, int x, int y){
         case '3':
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             break;
+        case '4':
+            screenShot = !screenShot;
     }
 }
 
