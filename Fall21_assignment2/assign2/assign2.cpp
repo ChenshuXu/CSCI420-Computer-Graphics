@@ -784,7 +784,7 @@ int loadSplines(char *argv)
 /*
  * convert control points to points in the world, store in vector allPoints
  */
-void createSplinePoints()
+void generateSplinePoints()
 {
     cout << "Number of splines: " << g_iNumOfSplines << endl;
     // s is typically set to 1/2
@@ -867,7 +867,7 @@ int main(int argc, char **argv)
     // argv[1] should be track.txt file
     loadSplines(argv[1]);
     // create splines
-    createSplinePoints();
+    generateSplinePoints();
 
     glutInit(&argc, argv);
     /*

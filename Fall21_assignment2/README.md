@@ -20,3 +20,5 @@ brew install libtiff
 > make
 > ./assign2 track.txt
 ```
+
+6) In extra credit, I rendered double rail
