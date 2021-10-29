@@ -10,7 +10,7 @@ INCLUDE = -I$(PIC_PATH)
 LIBRARIES = -L$(PIC_PATH) -framework OpenGL -framework GLUT -lpicio -ljpeg
 
 COMPILER = g++
-COMPILERFLAGS = -O3 $(INCLUDE)
+COMPILERFLAGS = -O3 -Wno-deprecated $(INCLUDE)
 
 PROGRAM = assign1
 SOURCE = assign1.cpp
