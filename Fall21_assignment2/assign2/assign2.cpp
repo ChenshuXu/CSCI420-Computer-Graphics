@@ -494,6 +494,7 @@ point crossProduct(point a, point b)
     s.z = a.x * b.y - a.y * b.x;
     return s;
 }
+
 /*
  * compute tagent using 4 points on the spline
  */
@@ -512,13 +513,13 @@ point calculateTagent(point P0, point P1, point P2, point P3)
 }
 
 /*
- * display splines and rail cross
+ * display splines
  */
 void displayRails()
 {
     // the spline points are in the middle, below the camera
     // normal points to the left of spline
-    // put left rail on the left of the spline points, so +normal direction
+    // put left rail on the left of the spline points, so +normal*0.1 direction
     glBegin(GL_LINE_STRIP);
     glLineWidth(100.0f);
     for (int i = 0; i < allPoints.size(); i++)
@@ -528,7 +529,7 @@ void displayRails()
     }
     glEnd();
 
-    // right rail, -normal direction
+    // right rail, -normal*0.1 direction
     glBegin(GL_LINE_STRIP);
     glLineWidth(100.0f);
     for (int i = 0; i < allPoints.size(); i++)
@@ -539,6 +540,9 @@ void displayRails()
     glEnd();
 }
 
+/*
+ * display rail cross
+ */
 void displayRailCross()
 {
     for (int i = 0; i < allPoints.size() - 4; i += 10)
@@ -579,72 +583,73 @@ void displayRailCross()
         point p_r4 = rightP.add(forward.inverse().add(up.inverse()).dot(scale));
 
         // it has 6 faces
+        // left face
         glBegin(GL_POLYGON);
-        glTexCoord2f(1.0, 0.0);
-        glVertex3d(p_l1.x, p_l1.y, p_l1.z);
-        glTexCoord2f(0.0, 0.0);
-        glVertex3d(p_l2.x, p_l2.y, p_l2.z);
         glTexCoord2f(0.0, 1.0);
-        glVertex3d(p_l3.x, p_l3.y, p_l3.z);
-        glTexCoord2f(1.0, 1.0);
         glVertex3d(p_l4.x, p_l4.y, p_l4.z);
-        glEnd();
-
-        glBegin(GL_POLYGON);
-        glTexCoord2f(1.0, 0.0);
-        glVertex3d(p_l1.x, p_l1.y, p_l1.z);
         glTexCoord2f(0.0, 0.0);
+        glVertex3d(p_l3.x, p_l3.y, p_l3.z);
+        glTexCoord2f(1.0, 0.0);
         glVertex3d(p_l2.x, p_l2.y, p_l2.z);
+        glTexCoord2f(1.0, 1.0);
+        glVertex3d(p_l1.x, p_l1.y, p_l1.z);
+        glEnd();
+        // right face
+        glBegin(GL_POLYGON);
         glTexCoord2f(0.0, 1.0);
+        glVertex3d(p_r1.x, p_r1.y, p_r1.z);
+        glTexCoord2f(0.0, 0.0);
         glVertex3d(p_r2.x, p_r2.y, p_r2.z);
-        glTexCoord2f(1.0, 1.0);
-        glVertex3d(p_r1.x, p_r1.y, p_r1.z);
-        glEnd();
-
-        glBegin(GL_POLYGON);
         glTexCoord2f(1.0, 0.0);
-        glVertex3d(p_l1.x, p_l1.y, p_l1.z);
-        glTexCoord2f(0.0, 0.0);
-        glVertex3d(p_l4.x, p_l4.y, p_l4.z);
-        glTexCoord2f(0.0, 1.0);
-        glVertex3d(p_r4.x, p_r4.y, p_r4.z);
-        glTexCoord2f(1.0, 1.0);
-        glVertex3d(p_r1.x, p_r1.y, p_r1.z);
-        glEnd();
-
-        glBegin(GL_POLYGON);
-        glTexCoord2f(1.0, 0.0);
-        glVertex3d(p_l4.x, p_l4.y, p_l4.z);
-        glTexCoord2f(0.0, 0.0);
-        glVertex3d(p_l3.x, p_l3.y, p_l3.z);
-        glTexCoord2f(0.0, 1.0);
         glVertex3d(p_r3.x, p_r3.y, p_r3.z);
         glTexCoord2f(1.0, 1.0);
         glVertex3d(p_r4.x, p_r4.y, p_r4.z);
         glEnd();
-
+        // forward face
+        glBegin(GL_POLYGON);
+        glTexCoord2f(0.0, 1.0);
+        glVertex3d(p_l1.x, p_l1.y, p_l1.z);
+        glTexCoord2f(0.0, 0.0);
+        glVertex3d(p_l2.x, p_l2.y, p_l2.z);
+        glTexCoord2f(1.0, 0.0);
+        glVertex3d(p_r2.x, p_r2.y, p_r2.z);
+        glTexCoord2f(1.0, 1.0);
+        glVertex3d(p_r1.x, p_r1.y, p_r1.z);
+        glEnd();
+        // down face
+        glBegin(GL_POLYGON);
+        glTexCoord2f(0.0, 0.0);
+        glVertex3d(p_l1.x, p_l1.y, p_l1.z);
+        glTexCoord2f(1.0, 0.0);
+        glVertex3d(p_r1.x, p_r1.y, p_r1.z);
+        glTexCoord2f(0.0, 1.0);
+        glVertex3d(p_r4.x, p_r4.y, p_r4.z);
+        glTexCoord2f(1.0, 1.0);
+        glVertex3d(p_l4.x, p_l4.y, p_l4.z);
+        glEnd();
+        // backward face
+        glBegin(GL_POLYGON);
+        glTexCoord2f(1.0, 1.0);
+        glVertex3d(p_l4.x, p_l4.y, p_l4.z);
+        glTexCoord2f(0.0, 1.0);
+        glVertex3d(p_r4.x, p_r4.y, p_r4.z);
+        glTexCoord2f(0.0, 0.0);
+        glVertex3d(p_r3.x, p_r3.y, p_r3.z);
+        glTexCoord2f(1.0, 0.0);
+        glVertex3d(p_l3.x, p_l3.y, p_l3.z);
+        glEnd();
+        // up face
         glBegin(GL_POLYGON);
         glTexCoord2f(1.0, 0.0);
         glVertex3d(p_l2.x, p_l2.y, p_l2.z);
-        glTexCoord2f(0.0, 0.0);
+        glTexCoord2f(1.0, 1.0);
         glVertex3d(p_l3.x, p_l3.y, p_l3.z);
         glTexCoord2f(0.0, 1.0);
         glVertex3d(p_r3.x, p_r3.y, p_r3.z);
-        glTexCoord2f(1.0, 1.0);
-        glVertex3d(p_r2.x, p_r2.y, p_r2.z);
-        glEnd();
-
-        glBegin(GL_POLYGON);
-        glTexCoord2f(1.0, 0.0);
-        glVertex3d(p_r1.x, p_r1.y, p_r1.z);
         glTexCoord2f(0.0, 0.0);
         glVertex3d(p_r2.x, p_r2.y, p_r2.z);
-        glTexCoord2f(0.0, 1.0);
-        glVertex3d(p_r3.x, p_r3.y, p_r3.z);
-        glTexCoord2f(1.0, 1.0);
-        glVertex3d(p_r4.x, p_r4.y, p_r4.z);
         glEnd();
-
+        
         glDisable(GL_TEXTURE_2D);
     }
 }
