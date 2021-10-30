@@ -512,40 +512,115 @@ point calculateTagent(point P0, point P1, point P2, point P3)
     return tagent;
 }
 
-/*
- * display splines
- */
-void displayRails()
+void displayRailSection(point p_b1, point p_b2, point p_b3, point p_b4, 
+        point p_e1, point p_e2, point p_e3, point p_e4)
 {
-    // the spline points are in the middle, below the camera
-    // normal points to the left of spline
-    // put left rail on the left of the spline points, so +normal*0.1 direction
-    glBegin(GL_LINE_STRIP);
-    glLineWidth(100.0f);
-    for (int i = 0; i < allPoints.size(); i++)
-    {
-        point v = allPoints[i].add(normal.dot(0.1));
-        glVertex3d(v.x, v.y, v.z);
-    }
+    float r = 0.5;
+    float g = 0.5;
+    float b = 0.5;
+    // up face
+    glBegin(GL_POLYGON);
+    glColor3f(r, g, b);
+    glVertex3f(p_e1.x, p_e1.y, p_e1.z);
+    glVertex3f(p_b1.x, p_b1.y, p_b1.z);
+    glVertex3f(p_b4.x, p_b4.y, p_b4.z);
+    glVertex3f(p_e4.x, p_e4.y, p_e4.z);
     glEnd();
 
-    // right rail, -normal*0.1 direction
-    glBegin(GL_LINE_STRIP);
-    glLineWidth(100.0f);
-    for (int i = 0; i < allPoints.size(); i++)
-    {
-        point v = allPoints[i].substract(normal.dot(0.1));
-        glVertex3d(v.x, v.y, v.z);
-    }
+    // left face
+    glBegin(GL_POLYGON);
+    glColor3f(r, g, b);
+    glVertex3f(p_e1.x, p_e1.y, p_e1.z);
+    glVertex3f(p_e2.x, p_e2.y, p_e2.z);
+    glVertex3f(p_b2.x, p_b2.y, p_b2.z);
+    glVertex3f(p_b1.x, p_b1.y, p_b1.z);
     glEnd();
+    
+    // right face
+    glBegin(GL_POLYGON);
+    glColor3f(r, g, b);
+    glVertex3f(p_e4.x, p_e4.y, p_e4.z);
+    glVertex3f(p_b4.x, p_b4.y, p_b4.z);
+    glVertex3f(p_b3.x, p_b3.y, p_b3.z);
+    glVertex3f(p_e3.x, p_e3.y, p_e3.z);
+    glEnd();
+
+    // down face
+    // glBegin(GL_POLYGON);
+    // glColor3f(r, g, b);
+    // glVertex3f(p_e1.x, p_e1.y, p_e1.z);
+    // glVertex3f(p_b1.x, p_b1.y, p_b1.z);
+    // glVertex3f(p_b4.x, p_b4.y, p_b4.z);
+    // glVertex3f(p_e4.x, p_e4.y, p_e4.z);
+    // glEnd();
+}
+
+/*
+ * display a rail section
+ */
+void displayRail(point begin, point end, point left, point forward, point up)
+{
+    double railScale = 0.02;
+    // points on begin face
+    point p_b1 = begin.add(up.dot(railScale)).add(left.dot(railScale));
+    point p_b2 = begin.add(up.inverse().dot(railScale)).add(left.dot(railScale));
+    point p_b3 = begin.add(up.inverse().dot(railScale)).add(left.inverse().dot(railScale));
+    point p_b4 = begin.add(up.dot(railScale)).add(left.inverse().dot(railScale));
+    // points on end face
+    point p_e1 = end.add(up.dot(railScale)).add(left.dot(railScale));
+    point p_e2 = end.add(up.inverse().dot(railScale)).add(left.dot(railScale));
+    point p_e3 = end.add(up.inverse().dot(railScale)).add(left.inverse().dot(railScale));
+    point p_e4 = end.add(up.dot(railScale)).add(left.inverse().dot(railScale));
+    
+    float r = 0.5;
+    float g = 0.5;
+    float b = 0.5;
+    // up face
+    glBegin(GL_POLYGON);
+    glColor3f(r, g, b);
+    glVertex3f(p_e1.x, p_e1.y, p_e1.z);
+    glVertex3f(p_b1.x, p_b1.y, p_b1.z);
+    glVertex3f(p_b4.x, p_b4.y, p_b4.z);
+    glVertex3f(p_e4.x, p_e4.y, p_e4.z);
+    glEnd();
+
+    // left face
+    glBegin(GL_POLYGON);
+    glColor3f(r, g, b);
+    glVertex3f(p_e1.x, p_e1.y, p_e1.z);
+    glVertex3f(p_e2.x, p_e2.y, p_e2.z);
+    glVertex3f(p_b2.x, p_b2.y, p_b2.z);
+    glVertex3f(p_b1.x, p_b1.y, p_b1.z);
+    glEnd();
+    
+    // right face
+    glBegin(GL_POLYGON);
+    glColor3f(r, g, b);
+    glVertex3f(p_e4.x, p_e4.y, p_e4.z);
+    glVertex3f(p_b4.x, p_b4.y, p_b4.z);
+    glVertex3f(p_b3.x, p_b3.y, p_b3.z);
+    glVertex3f(p_e3.x, p_e3.y, p_e3.z);
+    glEnd();
+
+    // down face
+    // glBegin(GL_POLYGON);
+    // glColor3f(r, g, b);
+    // glVertex3f(p_e1.x, p_e1.y, p_e1.z);
+    // glVertex3f(p_b1.x, p_b1.y, p_b1.z);
+    // glVertex3f(p_b4.x, p_b4.y, p_b4.z);
+    // glVertex3f(p_e4.x, p_e4.y, p_e4.z);
+    // glEnd();
 }
 
 /*
  * display rail cross
  */
-void displayRailCross()
+void displayRails()
 {
-    for (int i = 0; i < allPoints.size() - 4; i += 10)
+    point prev_lp1, prev_lp2, prev_lp3, prev_lp4;
+    point prev_rp1, prev_rp2, prev_rp3, prev_rp4;
+
+    for (int i = 6; i < allPoints.size() - 3; i += 6)
     {
         point left = normalCoords[i];
         point forward = tangentCoords[i];
@@ -557,7 +632,53 @@ void displayRailCross()
         // left tract point -normal*0.1
         point rightP = allPoints[i].substract(left.dot(0.1));
 
-        // rander the rail cross box
+        point prev_leftP = allPoints[i-6].add(left.dot(0.1));
+        point prev_rightP = allPoints[i-6].substract(left.dot(0.1));
+
+        double railScale = 0.02;
+        // points on left begin face
+        point p_lb1 = prev_lp1;
+        point p_lb2 = prev_lp2;
+        point p_lb3 = prev_lp3;
+        point p_lb4 = prev_lp4;
+        // points on left end face
+        point p_le1 = leftP.add(up.dot(railScale)).add(left.dot(railScale));
+        point p_le2 = leftP.add(up.inverse().dot(railScale)).add(left.dot(railScale));
+        point p_le3 = leftP.add(up.inverse().dot(railScale)).add(left.inverse().dot(railScale));
+        point p_le4 = leftP.add(up.dot(railScale)).add(left.inverse().dot(railScale));
+        
+        // render left rail
+        if (i > 6)
+        {
+            displayRailSection(p_lb1, p_lb2, p_lb3, p_lb4, p_le1, p_le2, p_le3, p_le4);
+        }
+        prev_lp1 = p_le1;
+        prev_lp2 = p_le2;
+        prev_lp3 = p_le3;
+        prev_lp4 = p_le4;
+
+        // points on right begin face
+        point p_rb1 = prev_rp1;
+        point p_rb2 = prev_rp2;
+        point p_rb3 = prev_rp3;
+        point p_rb4 = prev_rp4;
+        // points on right end face
+        point p_re1 = rightP.add(up.dot(railScale)).add(left.dot(railScale));
+        point p_re2 = rightP.add(up.inverse().dot(railScale)).add(left.dot(railScale));
+        point p_re3 = rightP.add(up.inverse().dot(railScale)).add(left.inverse().dot(railScale));
+        point p_re4 = rightP.add(up.dot(railScale)).add(left.inverse().dot(railScale));
+        
+        // render right rail
+        if (i > 6)
+        {
+            displayRailSection(p_rb1, p_rb2, p_rb3, p_rb4, p_re1, p_re2, p_re3, p_re4);
+        }
+        prev_rp1 = p_re1;
+        prev_rp2 = p_re2;
+        prev_rp3 = p_re3;
+        prev_rp4 = p_re4;
+
+        // render the rail cross box
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, woodTexture);
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -669,7 +790,6 @@ void display()
     binormal = binormalCoords[currentPoint];
 
     displayRails();
-    displayRailCross();
 
     //loading identity matrix and setting viewing perspective
     glMatrixMode(GL_MODELVIEW);
