@@ -9,12 +9,12 @@ PIC_PATH = $(abspath $(CURDIR)/../pic)
 INCLUDE = -I$(PIC_PATH)
 
 # For Linux
-LIBRARIES = -L$(PIC_PATH) -lGL -lGLU -lglut -ljpeg -lpicio -lm
+#LIBRARIES = -L$(PIC_PATH) -lGL -lGLU -lglut -ljpeg -lpicio -lm
 # For Mac
-# LIBRARIES = -L$(PIC_PATH) -framework OpenGL -framework GLUT -lpicio -ljpeg -lm
+ LIBRARIES = -L$(PIC_PATH) -framework OpenGL -framework GLUT -lpicio -ljpeg -lm
 
 COMPILER = g++
-COMPILERFLAGS = -O3 $(INCLUDE)
+COMPILERFLAGS = -O3 -Wno-deprecated $(INCLUDE)
 
 PROGRAM = assign3
 SOURCE = assign3.cpp

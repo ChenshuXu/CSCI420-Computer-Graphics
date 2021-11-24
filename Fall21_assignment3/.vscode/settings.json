@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "__hash_table": "cpp",
+        "algorithm": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp",
+        "functional": "cpp",
+        "locale": "cpp",
+        "type_traits": "cpp"
+    }
+}
