@@ -64,7 +64,7 @@ struct Point
     Point operator- () const { return Point(-x, -y, -z); }
     Point operator* (double p) const { return Point(x * p, y * p, z * p); }
     Point operator/(double b) const { return Point(x / b, y / b, z / b); }
-    Point mult(const Point &b) const { return Point(x * b.x, y * b.y, z * b.z); }
+    Point multi(const Point &b) const { return Point(x * b.x, y * b.y, z * b.z); }
     double dot(const Point &b) const { return x * b.x + y * b.y + z * b.z; }
     Point cross(Point p)
     {
@@ -276,26 +276,40 @@ bool hit_by_light(Light light, Point position) {
     return false;
 }
 
+/*
+ * calculate unit reflect vector
+ */
 Point get_reflect_direction(Point in, Point normal) {
     return (in - normal * 2 * normal.dot(in)).normalize();
 }
 
 /*
- * calculate phongshading
+ * calculate phongshading, diffuse and specular part
+ * reference on Lecture11.2 p32 and Lecture 5.1
  */
 Point get_phong_shading_color(Vertex hit_point, Light light) {
-    Point diffuse, specular;
+    // l -> light direction
+    // n -> normal
+    // diffuse = Kd * (l dot n)
     Point light_direction = (light.position - hit_point.position).normalize();
-    double diff = max(light_direction.dot(hit_point.normal), 0.0);
-    diffuse = light.color.mult(hit_point.color_diffuse * diff);
-
-    // camera is at origin
-    Point viewDir = (-hit_point.position).normalize();
-    Point reflectDir = get_reflect_direction(-light_direction, hit_point.normal);
-    double spec = pow(max(viewDir.dot(reflectDir),0.0), hit_point.shininess);
-    specular =  light.color.mult(hit_point.color_specular * spec);
+    double ln = max(light_direction.dot(hit_point.normal), 0.0);
+    Point diffuse = hit_point.color_diffuse * ln;
     
-    return diffuse + specular;
+    // specular = Ks * ((R dot V) ^ a)
+    // a -> shininess
+    // R -> unit reflect vector
+    // V -> unit vector to camera
+    Point V = (-hit_point.position).normalize();
+    Point R = get_reflect_direction(-light_direction, hit_point.normal);
+    Point specular = hit_point.color_specular * pow(max(R.dot(V), 0.0), hit_point.shininess);
+    
+    // each color from light multiply with (diffuse + specular)
+    double r, g, b;
+    r = light.color.x * (diffuse + specular).x;
+    g = light.color.y * (diffuse + specular).y;
+    b = light.color.z * (diffuse + specular).z;
+
+    return Point(r, g, b);
 }
 
 void clamp(Point& color) {
@@ -334,7 +348,6 @@ Ray create_ray(int x, int y) {
 Point ray_tracing(int x, int y) {
     // generate ray
     Ray ray = create_ray(x, y);
-    Point color = ambient_light;
 
     // r(t) = o + t*d
     // use t to record hit point with objects on ray
@@ -348,7 +361,7 @@ Point ray_tracing(int x, int y) {
     // cout << index_s << " " << index_t << endl;
     if (!hit_triangle && !hit_sphere) {
         // return backgroud color
-        return color;
+        return Point(1, 1, 1);
     }
 
     Vertex hit_point;
@@ -383,13 +396,15 @@ Point ray_tracing(int x, int y) {
     // for each light source, fire shadow ray
     // for each unblocked shadow ray, evaluate local Phone model for that light,
     // and add the result to pixel color
-    color = Point(0, 0, 0);
+    Point color = Point(0, 0, 0);
+    bool hit_by_light_once = false;
     for (int i = 0; i < num_lights; i++) {
         if (hit_by_light(lights[i], hit_point.position)) {
             color = color + get_phong_shading_color(hit_point, lights[i]);
+            hit_by_light_once = true;
         }
     }
-
+    color = color + ambient_light;
     // clamp color to range [0, 1]
     clamp(color);
     return color;
