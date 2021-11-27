@@ -2,7 +2,7 @@
 CSCI 420
 Assignment 3 Raytracer
 
-Name: <Your name here>
+Name: Chenshu Xu
 */
 
 #include <string.h>
@@ -47,7 +47,7 @@ int mode = MODE_DISPLAY;
 //the field of view of the camera
 #define fov 60.0
 #define PI 3.1415926535
-const double EPSILON = 1e-6;
+#define EPSILON 1e-5
 #define ALPHA tan((fov/2.0) * (PI/180.0))
 
 unsigned char buffer[HEIGHT][WIDTH][3];
@@ -59,55 +59,13 @@ struct Point
     double z;
     Point() { x = y = z = 0.0f; }
     Point(double x, double y, double z) : x(x), y(y), z(z) {}
-    Point add(Point p)
-    {
-        Point newPoint;
-        newPoint.x = x + p.x;
-        newPoint.y = y + p.y;
-        newPoint.z = z + p.z;
-        return newPoint;
-    }
-    Point operator+ (Point p) {
-        return Point(x + p.x, y + p.y, z + p.z);
-    }
-    Point substract(Point p)
-    {
-        Point newPoint;
-        newPoint.x = x - p.x;
-        newPoint.y = y - p.y;
-        newPoint.z = z - p.z;
-        return newPoint;
-    }
-    Point operator- (Point p) {
-        return Point(x - p.x, y - p.y, z - p.z);
-    }
-    Point operator- () {
-        return Point(-x, -y, -z);
-    }
-    Point dot(double p)
-    {
-        Point newPoint;
-        newPoint.x = x * p;
-        newPoint.y = y * p;
-        newPoint.z = z * p;
-        return newPoint;
-    }
-    double dot(Point other)
-    {
-        return (x * other.x + y * other.y + z * other.z);
-    }
-    Point operator* (double p)
-    {
-        return Point(x * p, y * p, z * p);
-    }
-    double operator* (Point other)
-    {
-        return (x * other.x + y * other.y + z * other.z);
-    }
-    Point multi(Point other)
-    {
-        return Point(x * other.x, y * other.y, z * other.z);
-    }
+    Point operator+(const Point &b) const { return Point(x+b.x,y+b.y,z+b.z); }
+    Point operator-(const Point &b) const { return Point(x-b.x,y-b.y,z-b.z); }
+    Point operator- () const { return Point(-x, -y, -z); }
+    Point operator* (double p) const { return Point(x * p, y * p, z * p); }
+    Point operator/(double b) const { return Point(x / b, y / b, z / b); }
+    Point mult(const Point &b) const { return Point(x * b.x, y * b.y, z * b.z); }
+    double dot(const Point &b) const { return x * b.x + y * b.y + z * b.z; }
     Point cross(Point p)
     {
         Point s;
@@ -116,34 +74,8 @@ struct Point
         s.z = x * p.y - y * p.x;
         return s;
     }
-    Point cross(Point a, Point b)
-    {
-
-        double x = a.y * b.z - a.z * b.y;
-        double y = a.z * b.x - a.x * b.z;
-        double z = a.x * b.y - a.y * b.x;
-        return Point(x, y, z);
-    }
-    Point& inverse()
-    {
-        x = -x;
-        y = -y;
-        z = -z;
-        return *this;
-    }
-    double get_length()
-    {
-        return sqrt(x * x + y * y + z * z);
-    }
-    Point& normalize()
-    {
-        if (get_length() != 0) {
-            x /= get_length();
-            y /= get_length();
-            z /= get_length();
-        }
-        return *this;
-    }
+    double get_length() { return sqrt(x * x + y * y + z * z); }
+    Point& normalize() { return *this = *this * (1/sqrt(x*x+y*y+z*z)); }
 
 };
 
@@ -354,14 +286,14 @@ Point get_reflect_direction(Point in, Point normal) {
 Point get_phong_shading_color(Vertex hit_point, Light light) {
     Point diffuse, specular;
     Point light_direction = (light.position - hit_point.position).normalize();
-    double diff = max(light_direction * hit_point.normal, 0.0);
-    diffuse = light.color.multi(hit_point.color_diffuse * diff);
+    double diff = max(light_direction.dot(hit_point.normal), 0.0);
+    diffuse = light.color.mult(hit_point.color_diffuse * diff);
 
     // camera is at origin
     Point viewDir = (-hit_point.position).normalize();
     Point reflectDir = get_reflect_direction(-light_direction, hit_point.normal);
     double spec = pow(max(viewDir.dot(reflectDir),0.0), hit_point.shininess);
-    specular =  light.color.multi(hit_point.color_specular * spec);
+    specular =  light.color.mult(hit_point.color_specular * spec);
     
     return diffuse + specular;
 }
