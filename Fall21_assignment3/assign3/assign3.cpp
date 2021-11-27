@@ -42,11 +42,13 @@ int mode = MODE_DISPLAY;
 //you may want to make these smaller for debugging purposes
 #define WIDTH 640
 #define HEIGHT 480
+#define ASPECT_RATIO 640.0/480.0
 
 //the field of view of the camera
 #define fov 60.0
-#define PI 3.14159265
-const double EPSILON = 0.0000001;
+#define PI 3.1415926535
+const double EPSILON = 1e-6;
+#define ALPHA tan((fov/2.0) * (PI/180.0))
 
 unsigned char buffer[HEIGHT][WIDTH][3];
 
@@ -224,12 +226,15 @@ bool sphere_intersection(Ray ray, double &t, int &index) {
         Point d = ray.direction;
         Point o = ray.origin;
         double r = sphere.radius;
+        // Point oc = ray.origin - center;
         // a = xd^2 + yd^2 + zd^2 (always be 1, because direction is normalized)
         double a = 1;
         // b = 2(xd(x0-xc) + yd(y0-yc) + zd(z0-zc))
         double b = 2 * (d.x * (o.x - center.x) + d.y * (o.y - center.y) + d.z * (o.z - center.z));
+        // double b = 2 * oc.dot(ray.direction);
         // c = (x0-xc)^2 + (y0-yc)^2 + (z0-zc)^2 - r^2
         double c = pow(o.x - center.x, 2) + pow(o.y - center.y, 2) + pow(o.z - center.z, 2) - pow(r, 2);
+        // double c = oc.dot(oc) - pow(r, 2);
         
         // in square root part: b^2-4ac
         double in_sqrt = b * b - 4 * a * c;
@@ -374,21 +379,19 @@ void clamp(Point& color) {
 /*
  * Create ray
  * Origin point is (0,0,0), direction if pixel at (x,y), camera direction is -z
+ * Cite: https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-camera-rays/generating-camera-rays
  */
 Ray create_ray(int x, int y) {
-    double aspect_ratio = (double)WIDTH/HEIGHT;
-    float rad = fov * PI / 180;
-    double screen_width = 2 * aspect_ratio * tan(rad/2);
-    double screen_height = 2 * tan(rad/2);
-    double cell_width =  screen_width / WIDTH;
-    double cell_height = screen_height / HEIGHT;
-    double x_min = -aspect_ratio * tan(rad/2);
-    double y_min = -tan(rad/2);
+    double pixel_NDC_x = (x+0.5)/WIDTH;
+    double pixel_NDC_y = (y+0.5)/HEIGHT;
 
-    double xx = x_min + (2 * x + 1) * cell_width / 2.0f;
-    double yy = y_min + (2 * y + 1) * cell_height/2.0f;
-    double zz = -1;
-    return Ray(Point(0, 0, 0), Point(xx, yy, zz).normalize());
+    double pixel_screen_x = 2 * pixel_NDC_x -1; //Bohan said to subtract 1 for proper bounds
+    double pixel_screen_y = 2 * pixel_NDC_y -1; //Bohan said to subtract 1 for proper bounds
+
+    double pixel_camera_x = pixel_screen_x * ASPECT_RATIO * ALPHA;
+    double pixel_camera_y = pixel_screen_y * ALPHA;
+
+    return Ray(Point(0, 0, 0), Point(pixel_camera_x, pixel_camera_y, -1.0).normalize());
 }
 
 /*
@@ -399,7 +402,7 @@ Ray create_ray(int x, int y) {
 Point ray_tracing(int x, int y) {
     // generate ray
     Ray ray = create_ray(x, y);
-    Point color = Point(0.1, 0.1, 0.1);
+    Point color = ambient_light;
 
     // r(t) = o + t*d
     // use t to record hit point with objects on ray
@@ -413,7 +416,7 @@ Point ray_tracing(int x, int y) {
     // cout << index_s << " " << index_t << endl;
     if (!hit_triangle && !hit_sphere) {
         // return backgroud color
-        return Point(0.5, 0.5, 0.5);
+        return color;
     }
 
     Vertex hit_point;
@@ -463,7 +466,7 @@ Point ray_tracing(int x, int y) {
 //MODIFY THIS FUNCTION
 void draw_scene() {
     unsigned int x, y;
-    int step = 2;
+    int step = 1;
     //simple output
     for (x = 0; x < WIDTH; x += step) {
         glPointSize(2.0);
