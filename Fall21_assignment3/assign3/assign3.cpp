@@ -197,6 +197,7 @@ bool triangle_intersection(Ray ray, double& t, int& index) {
 
     // test all triangles
     // find the closest one using Möller–Trumbore intersection algorithm
+    // reference: https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     for (int i = 0; i < num_triangles; i++) {
         Triangle triangle = triangles[i];
         Point edge1 = triangle.v[1].position - triangle.v[0].position;
